@@ -22,6 +22,9 @@ source $VENV_DIR/bin/activate
 echo "Upgrading pip..."
 pip install --upgrade pip
 
+# Add src/ to PYTHONPATH
+export PYTHONPATH=$SRC_DIR:$PYTHONPATH
+
 for SERVICE_TEST in $(find "$TEST_DIR" -mindepth 1 -maxdepth 1 -type d -exec basename {} \;); do
   echo "Installing $SERVICE_TEST dependencies..."
   pip install -r $TEST_DIR/$SERVICE_TEST/requirements.txt

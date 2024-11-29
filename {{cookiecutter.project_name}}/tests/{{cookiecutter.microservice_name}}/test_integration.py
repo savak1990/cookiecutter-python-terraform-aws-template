@@ -1,7 +1,6 @@
 import pytest
 import requests
 import os
-from urllib.parse import urljoin
 
 @pytest.fixture
 def api_url():
