@@ -11,4 +11,4 @@ terraform init
 echo "Applying Terraform configuration..."
 terraform destroy -auto-approve
 
-echo "Terraform deployment complete."
+echo "Terraform destroy complete."
