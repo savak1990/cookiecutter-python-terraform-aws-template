@@ -1,0 +1,7 @@
+{
+  "project_name": "my_project",
+  "aws_region": "us-east-1",
+  "microservice_name": "my_service",
+  "author_name": "Author",
+  "description": "Template for AWS + Python + Terraform microservice module"
+}
