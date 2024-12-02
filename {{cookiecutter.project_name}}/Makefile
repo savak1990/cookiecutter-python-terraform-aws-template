@@ -30,4 +30,4 @@ clean: undeploy
 	bash scripts/clean.sh
 
 # Full workflow: package, test, deploy
-all: clean package test deploy
+all: clean test integration
