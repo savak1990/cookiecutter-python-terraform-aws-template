@@ -2,7 +2,7 @@
 set -e
 
 # Navigate to the terraform directory
-cd terraform
+cd deploy
 
 # Deploy Terraform infrastructure
 echo "Initializing Terraform..."

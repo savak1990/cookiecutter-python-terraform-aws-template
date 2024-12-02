@@ -2,10 +2,10 @@
 set -e  # Exit immediately if a command exits with a non-zero status
 
 # Navigate to the terraform directory
-cd terraform
+cd deploy
 
 # Get the Terraform output
-{{ cookiecutter.microservice_name|upper }}_API_URL=$(terraform output -raw {{ cookiecutter.microservice_name }}_api_url)
+{{ cookiecutter.microservice_name|upper }}_API_URL=$(terraform output -raw api_url)
 
 # Check if Terraform output was successful
 if [ -z "${{ cookiecutter.microservice_name|upper }}_API_URL" ]; then
