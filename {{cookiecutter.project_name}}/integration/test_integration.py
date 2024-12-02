@@ -4,7 +4,7 @@ import os
 
 @pytest.fixture
 def api_url():
-  return os.environ.get("API_URL")
+  return os.environ.get(f"{{ cookiecutter.microservice_name }}_API_URL".upper())
   
 @pytest.fixture
 def env():

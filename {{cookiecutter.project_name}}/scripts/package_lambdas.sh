@@ -23,35 +23,33 @@ echo "Upgrading pip..."
 pip install --upgrade pip
 
 # Package each Lambda function
-for SERVICE in $(ls $SRC_DIR); do
-    echo "Packaging $SERVICE..."
+echo "Packaging $SRC_DIR..."
 
-    SERVICE_DIR="$SRC_DIR/$SERVICE"
-    TEMP_SERVICE_DIR="$BUILD_DIR/$SERVICE"
+SERVICE={{ cookiecutter.microservice_name }}
+TEMP_SERVICE_DIR="$BUILD_DIR/$SERVICE"
 
-    # Clean up any previous temp_package directory
-    rm -rf $TEMP_SERVICE_DIR
+# Clean up any previous temp_package directory
+rm -rf $TEMP_SERVICE_DIR
 
-    # Check if requirements.txt exists and install dependencies
-    if [ -f "$SERVICE_DIR/requirements.txt" ]; then
-        echo "Installing dependencies for $SERVICE..."
-        mkdir -p $TEMP_SERVICE_DIR
-        pip install -r $SERVICE_DIR/requirements.txt --target $TEMP_SERVICE_DIR
-    fi
+# Check if requirements.txt exists and install dependencies
+if [ -f "$SRC_DIR/requirements.txt" ]; then
+    echo "Installing dependencies for $SERVICE..."
+    mkdir -p $TEMP_SERVICE_DIR
+    pip install -r $SRC_DIR/requirements.txt --target $TEMP_SERVICE_DIR
+fi
 
-    # Copy source files into temp_package
-    cp -r $SERVICE_DIR/* $TEMP_SERVICE_DIR
+# Copy source files into temp_package
+cp -r $SRC_DIR/* $TEMP_SERVICE_DIR
 
-    # Remove unnecessary files from the temp_package directory
-    rm -rf $TEMP_SERVICE_DIR/__pycache__
+# Remove unnecessary files from the temp_package directory
+rm -rf $TEMP_SERVICE_DIR/__pycache__
 
-    # Create a zip package
-    cd $TEMP_SERVICE_DIR
-    zip -r ../${SERVICE}.zip . -x "*.pyc" -x "__pycache__/*"
-    cd - > /dev/null
+# Create a zip package
+cd $TEMP_SERVICE_DIR
+zip -X -r ../${SERVICE}.zip . -x "*.pyc" -x "__pycache__/*"
+cd - > /dev/null
 
-    echo "$SERVICE packaged successfully!"
-done
+echo "$SERVICE packaged successfully!"
 
 # Deactivate the virtual environment (optional)
 echo "Deactivating virtual environment..."

@@ -6,7 +6,8 @@ VENV_DIR=".venv"
 
 # Define the source and test directories
 SRC_DIR="./src"
-TEST_DIR="./tests"
+TEST_DIR=$1
+echo "Test dir: $TEST_DIR"
 
 # Create the virtual environment if it doesn't exist
 if [ ! -d "$VENV_DIR" ]; then
@@ -25,17 +26,14 @@ pip install --upgrade pip
 # Add src/ to PYTHONPATH
 export PYTHONPATH=$SRC_DIR:$PYTHONPATH
 
-for SERVICE_TEST in $(find "$TEST_DIR" -mindepth 1 -maxdepth 1 -type d -exec basename {} \;); do
-  echo "Installing $SERVICE_TEST dependencies..."
-  pip install -r $TEST_DIR/$SERVICE_TEST/requirements.txt
-done
+# Installing test dependencies
+echo "Installing test dependencies..."
+pip install -r $TEST_DIR/requirements.txt
 
-# Package each Lambda function (list only directories)
-for SERVICE in $(find "$SRC_DIR" -mindepth 1 -maxdepth 1 -type d -exec basename {} \;); do
-  echo "Installing $SERVICE dependencies and creating a module..."
-  pip install -r "$SRC_DIR/$SERVICE/requirements.txt"
-  pip install -e "$SRC_DIR/$SERVICE"
-done
+# Package Lambda function (list only directories)
+echo "Installing {{ cookiecutter.microservice_name }} dependencies and creating a module..."
+pip install -r "$SRC_DIR/requirements.txt"
+pip install -e "$SRC_DIR"
 
 # Run the tests
 echo "Running tests..."

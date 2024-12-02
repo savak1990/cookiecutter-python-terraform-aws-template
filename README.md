@@ -1,6 +1,6 @@
 # Cookiecutter Template for Terraform + Python Projects
 
-This template scaffolds a multi-microservice project with Python and Terraform.
+This template scaffolds a microservice project with Python and Terraform.
 
 ## Variables
 - `project_name`: Name of the project.

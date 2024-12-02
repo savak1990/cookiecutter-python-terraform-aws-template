@@ -19,10 +19,14 @@ undeploy:
 
 # Run tests
 test:
-	bash scripts/test.sh
+	bash scripts/test.sh ./tests
+
+# Run integration tests
+integration: deploy
+	bash scripts/integration.sh
 
 # Clean up build artifacts
-clean:
+clean: undeploy
 	bash scripts/clean.sh
 
 # Full workflow: package, test, deploy
