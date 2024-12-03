@@ -4,8 +4,9 @@ set -e  # Exit immediately if a command exits with a non-zero status
 # Navigate to the terraform directory
 cd deploy
 
-# Get the Terraform output
-{{ cookiecutter.microservice_name|upper }}_API_URL=$(terraform output -raw api_url)
+# Get the Terraform output api gateway url. Don't use the final URL from Route 53 because it takes time to setup
+# while with api gateway you can start testing right away.
+{{ cookiecutter.microservice_name|upper }}_API_URL=$(terraform output -raw api_gateway_url)
 
 # Check if Terraform output was successful
 if [ -z "${{ cookiecutter.microservice_name|upper }}_API_URL" ]; then

@@ -19,3 +19,13 @@ variable "runtime" {
   description = "Runtime for the Lambda function"
   default     = "python3.9"
 }
+
+variable "log_level" {
+  description = "Log level to use for the lambda: debug, info, error"
+  type        = string
+  default     = "info"
+  validation {
+    condition     = contains(["debug", "info", "warning", "error"], var.log_level)
+    error_message = "Unsupported log_level. Must be one of debug, info, warning, error"
+  }
+}

@@ -1,3 +1,9 @@
+locals {
+  api_env_name         = "${var.api_name}-${var.env}"
+  lambda_function_name = "${local.api_env_name}-function"
+  api_gateway_api_name = "${local.api_env_name}-api"
+}
+
 module "iam" {
   source             = "./modules/iam"
   role_name          = "${var.api_name}-role"
@@ -20,18 +26,20 @@ EOF
 
 module "lambda" {
   source        = "./modules/lambda"
-  zip_file      = "${path.module}/../build/${var.api_name}.zip"
-  function_name = "${var.api_name}-function"
+  zip_file      = var.lambda_zip_file
+  function_name = local.lambda_function_name
   role_arn      = module.iam.role_arn
   handler       = "handler.handler"
   runtime       = "python3.9"
+  log_level     = var.log_level
 }
 
 module "api_gateway" {
   source            = "./modules/api_gateway"
-  api_name          = "${var.api_name}-api"
+  api_name          = local.api_gateway_api_name
   path              = var.path
   lambda_arn        = module.lambda.lambda_arn
   lambda_invoke_arn = module.lambda.lambda_invoke_arn
   stage_name        = var.stage
+  root_domain_name  = var.domain_name
 }

@@ -5,18 +5,14 @@ import os
 @pytest.fixture
 def api_url():
   return os.environ.get(f"{{ cookiecutter.microservice_name }}_API_URL".upper())
-  
-@pytest.fixture
-def env():
-  return os.environ.get("ENV", "dev")
 
 @pytest.fixture
 def path():
   return "hello"
   
 @pytest.fixture
-def endpoint(api_url, env, path):
-  return f'{api_url}/{env}/{path}'
+def endpoint(api_url, path):
+  return f'{api_url}/v1/{path}'
 
 def test_integration_api_success(endpoint):
   # Make a request to the deployed API Gateway

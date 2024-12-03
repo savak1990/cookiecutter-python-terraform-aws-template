@@ -1,3 +1,19 @@
+locals {
+  route53_domain_name = "${var.api_name}.${var.root_domain_name}"
+}
+
+data "aws_region" "current" {}
+
+data "aws_route53_zone" "selected" {
+  name         = var.root_domain_name
+  private_zone = false
+}
+
+data "aws_acm_certificate" "wildcard_cert" {
+  domain   = "*.${var.root_domain_name}"
+  statuses = ["ISSUED"]
+}
+
 resource "aws_api_gateway_rest_api" "api" {
   name = var.api_name
 }
@@ -41,4 +57,33 @@ resource "aws_api_gateway_stage" "stage" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   deployment_id = aws_api_gateway_deployment.deployment.id
   stage_name    = var.stage_name
+  depends_on    = [aws_api_gateway_base_path_mapping.mapping]
+}
+
+resource "aws_api_gateway_domain_name" "custom_domain" {
+  domain_name     = local.route53_domain_name
+  certificate_arn = data.aws_acm_certificate.wildcard_cert.arn
+}
+
+resource "aws_api_gateway_base_path_mapping" "mapping" {
+  domain_name = aws_api_gateway_domain_name.custom_domain.domain_name
+  api_id      = aws_api_gateway_rest_api.api.id
+  stage_name  = var.stage_name
+  base_path   = var.stage_name
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_route53_record" "api_record" {
+  zone_id = data.aws_route53_zone.selected.zone_id
+  name    = local.route53_domain_name
+  type    = "A"
+
+  alias {
+    name                   = aws_api_gateway_domain_name.custom_domain.cloudfront_domain_name
+    zone_id                = aws_api_gateway_domain_name.custom_domain.cloudfront_zone_id
+    evaluate_target_health = false
+  }
 }
