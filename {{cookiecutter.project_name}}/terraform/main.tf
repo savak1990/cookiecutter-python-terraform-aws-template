@@ -40,6 +40,5 @@ module "api_gateway" {
   path              = var.path
   lambda_arn        = module.lambda.lambda_arn
   lambda_invoke_arn = module.lambda.lambda_invoke_arn
-  stage_name        = var.stage
   root_domain_name  = var.domain_name
 }

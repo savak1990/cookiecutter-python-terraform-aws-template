@@ -13,12 +13,6 @@ variable "env" {
   }
 }
 
-variable "stage" {
-  description = "Stage of API Gateway. Supported values: dev, staging, prod"
-  type        = string
-  default     = "v1"
-}
-
 variable "path" {
   description = "value"
   type        = string
