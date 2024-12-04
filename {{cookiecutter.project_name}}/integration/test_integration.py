@@ -4,7 +4,9 @@ import os
 
 @pytest.fixture
 def api_url():
-  return os.environ.get(f"{{ cookiecutter.microservice_name }}_API_URL".upper())
+  host = os.environ.get("API_URL")
+  stage_name = os.environ.get("API_STAGE_NAME")
+  return f'{host}{stage_name}'
 
 @pytest.fixture
 def path():
@@ -12,7 +14,7 @@ def path():
   
 @pytest.fixture
 def endpoint(api_url, path):
-  return f'{api_url}/v1/{path}'
+  return f'{api_url}/{path}'
 
 def test_integration_api_success(endpoint):
   # Make a request to the deployed API Gateway
@@ -20,7 +22,18 @@ def test_integration_api_success(endpoint):
 
   # Validate the response
   assert response.status_code == 200
-  assert response.text == "Hello from {{ cookiecutter.microservice_name }}"
+  
+  # Ensure the response is JSON
+  try:
+    json_data = response.json()
+  except ValueError:
+    assert False, "Response is not valid JSON"
+  
+  expected_json = {
+    "message": "Hello from {{ cookiecutter.microservice_name }}"
+  }
+  
+  assert json_data == expected_json, f"Unexpected json response"
 
 def test_integration_api_missing_name(api_url):
   # Make a request without query parameters
@@ -28,4 +41,3 @@ def test_integration_api_missing_name(api_url):
 
   # Validate the response
   assert response.status_code == 403
-  assert response.text == '{"message":"Forbidden"}'

@@ -6,3 +6,7 @@ output "default_url" {
 output "custom_domain_name" {
   value = "https://${aws_route53_record.api_record.name}"
 }
+
+output "stage_name" {
+  value = local.stage_name
+}

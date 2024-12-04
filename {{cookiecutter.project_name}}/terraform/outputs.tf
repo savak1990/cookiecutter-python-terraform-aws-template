@@ -17,3 +17,8 @@ output "api_gateway_api_name" {
   description = "Name of the API"
   value       = local.api_gateway_api_name
 }
+
+output "api_gateway_stage_name" {
+  description = "Api gateway stage name"
+  value       = module.api_gateway.stage_name
+}

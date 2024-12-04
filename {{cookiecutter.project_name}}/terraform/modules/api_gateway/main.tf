@@ -1,5 +1,6 @@
 locals {
   route53_domain_name = "${var.api_name}.${var.root_domain_name}"
+  stage_name          = "api"
 }
 
 data "aws_region" "current" {}
@@ -56,7 +57,7 @@ resource "aws_api_gateway_deployment" "deployment" {
 resource "aws_api_gateway_stage" "stage" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   deployment_id = aws_api_gateway_deployment.deployment.id
-  stage_name    = "api"
+  stage_name    = local.stage_name
 }
 
 resource "aws_api_gateway_domain_name" "custom_domain" {
@@ -67,7 +68,7 @@ resource "aws_api_gateway_domain_name" "custom_domain" {
 resource "aws_api_gateway_base_path_mapping" "mapping" {
   domain_name = aws_api_gateway_domain_name.custom_domain.domain_name
   api_id      = aws_api_gateway_rest_api.api.id
-  stage_name  = "api"
+  stage_name  = local.stage_name
 }
 
 resource "aws_route53_record" "api_record" {
