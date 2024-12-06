@@ -7,7 +7,7 @@ module "{{ cookiecutter.microservice_name }}" {
   api_name        = "{{ cookiecutter.microservice_name.replace("_", "-") }}"
   lambda_zip_file = "${path.module}/../build/{{ cookiecutter.microservice_name }}.zip"
   path            = "hello"
-  env             = "dev"
+  env             = var.instance_name
   domain_name     = "{{ cookiecutter.domain_name }}"
   log_level       = "debug"
 }

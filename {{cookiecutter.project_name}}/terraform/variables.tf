@@ -7,10 +7,6 @@ variable "env" {
   description = "Environment. Supported options: dev, staging, prod"
   type        = string
   default     = "dev"
-  validation {
-    condition     = contains(["dev", "staging", "prod"], var.env)
-    error_message = "Unsupported env value. Should be one of dev, staging, prod"
-  }
 }
 
 variable "path" {

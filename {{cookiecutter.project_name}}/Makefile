@@ -1,19 +1,28 @@
 # Define variables
+MICROSERVICE_NAME = {{ cookiecutter.microservice_name }}
+
 VENV_DIR := .venv
 SRC_DIR := src
 TEST_DIR := tests
 INTEG_DIR := integration
 TERRAFORM_DIR := terraform
 DEPLOY_DIR := deploy
+BUILD_DIR = build
+
 REQUIREMENTS := $(SRC_DIR)/requirements.txt
 TEST_REQUIREMENTS := $(TEST_DIR)/requirements.txt
 INTEG_TEST_REQUIREMENTS := $(INTEG_DIR)/requirements.txt
-BUILD_DIR = build
-MICROSERVICE_NAME = {{ cookiecutter.microservice_name }}
+
 ZIP_PACKAGE_FILE = $(BUILD_DIR)/$(MICROSERVICE_NAME).zip
 TEMP_SERVICE_DIR = $(BUILD_DIR)/$(MICROSERVICE_NAME)
 PACKAGE_TIMESTAMP_FILE := $(BUILD_DIR)/.package.timestamp
 API_URL_FILE := $(BUILD_DIR)/api_url.txt
+ROOT_BUCKET := {{ cookiecutter.artifacts_storage }}
+INSTANCE_NAME := $$(whoami)
+GITHUB_OWNER := {{ cookiecutter.github_owner }}
+GITHUB_PROJECT_NAME := {{ cookiecutter.github_project_name }}
+GITHUB_REPO := $(GITHUB_OWNER)/$(GITHUB_PROJECT_NAME)
+GITHUB_TOKEN_AWS_SECRET := {{ cookiecutter.github_token_aws_secret }}
 
 PIP = $(VENV_DIR)/bin/pip
 PYTEST = $(VENV_DIR)/bin/pytest
@@ -23,7 +32,7 @@ SRC_FILES := $(shell find $(SRC_DIR) -type f \( -name "*.py" -o -name "*.txt" \)
 TF_FILES := $(shell find $(TERRAFORM_DIR) $(DEPLOY_DIR) -type f -name "*.tf")
 
 # Targets
-.PHONY: all build package deploy destroy test integration clean 
+.PHONY: all build package deploy destroy test integration clean pipeline kill-pipeline github kill-github
 
 # Target to create virtual environment and install requirements
 $(VENV_DIR): $(REQUIREMENTS)
@@ -73,7 +82,7 @@ $(API_URL_FILE): $(PACKAGE_TIMESTAMP_FILE) $(TF_FILES)
 	rm -f $(API_URL_FILE)
 	cd deploy && \
 	terraform init && \
-	terraform apply -auto-approve && \
+	terraform apply -auto-approve -var="instance_name=$(INSTANCE_NAME)" && \
 	terraform output --raw api_url > ../$(API_URL_FILE)
 
 # Deploy infrastructure and Lambda functions
@@ -86,7 +95,7 @@ undeploy:
 	rm -f $(API_URL_FILE)
 	cd deploy && \
 	terraform init && \
-	terraform destroy -auto-approve
+	terraform destroy -auto-approve -var="instance_name=$(INSTANCE_NAME)"
 
 # Clean up build artifacts
 clean:
@@ -94,6 +103,40 @@ clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf $(VENV_DIR)
 	@echo "Build artifacts cleaned"
+
+# Creates github repository
+github:
+	@echo "Creating github repository for the project..."
+	cd github && terraform init
+	cd github && terraform apply -auto-approve \
+		-var="github_token_aws_secret=$(GITHUB_TOKEN_AWS_SECRET)" \
+		-var="github_owner=$(GITHUB_OWNER)" \
+		-var="github_repo_name=$(GITHUB_PROJECT_NAME)"
+	git init
+	git add .
+	git commit -m "Initial commit"
+
+# Kills github repository
+kill-github:
+	@echo "Deleting github repository for the project..."
+	cd github && terraform init
+	cd github && terraform destroy \
+		-var="github_token_aws_secret=$(GITHUB_TOKEN_AWS_SECRET)" \
+		-var="github_owner=$(GITHUB_OWNER)" \
+		-var="github_repo_name=$(GITHUB_PROJECT_NAME)"
+
+# Creates AWS Code Pipeline for this project
+pipeline:
+	@echo "Creating pipeline for the project..."
+	cd pipeline && terraform init
+	cd pipeline && terraform apply -auto-approve
+
+# Kills aws pipeline for this project
+kill-pipeline:
+	@echo "Deleting pipeline for the project..."
+	aws s3 rm s3://$(ROOT_BUCKET)/$(MICROSERVICE_NAME) --recursive
+	cd pipeline && terraform init
+	cd pipeline && terraform destroy -auto-approve
 
 # Full workflow: package, test, deploy
 all: clean test integration

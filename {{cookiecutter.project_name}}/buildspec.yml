@@ -1,0 +1,55 @@
+version: 0.2
+
+env:
+  shell: bash
+  variables:
+    GITHUB_USER: "{{ cookiecutter.github_owner }}"
+    REPO_NAME: "{{ cookiecutter.github_project_name }}"
+  secrets-manager:
+    GITHUB_TOKEN: "{{ cookiecutter.github_token_aws_secret }}:github_token"
+
+phases:
+  install:
+    commands:
+      - echo "Installing dependencies"
+      - apt-get update
+      - apt-get install -y make zip python3 
+      - python3 --version
+
+  pre_build:
+    commands:
+      - echo "Prebuild stage"
+      - echo "whoami is $(whoami)"
+      - env
+      - echo "Build Number is $CODEBUILD_BUILD_NUMBER"
+      - echo "GitHub Token starts with ${GITHUB_TOKEN:0:5}"
+      - echo "Commit SHA is $CODEBUILD_RESOLVED_SOURCE_VERSION"
+
+  build:
+    commands:
+      - echo "Run tests and package"
+      - make test
+      - make package
+      - echo "Build artifacts ready"
+      - ls -lah build
+  
+  post_build:
+    on-failure: CONTINUE
+    commands:
+      - echo "Postbuild stage"
+      - >
+        curl -X POST
+        -H "Authorization: token $GITHUB_TOKEN"
+        -H "Content-Type: application/json"
+        -d "{
+              \"ref\": \"refs/tags/v$CODEBUILD_BUILD_NUMBER\",
+              \"sha\": \"$CODEBUILD_RESOLVED_SOURCE_VERSION\"
+            }" https://api.github.com/repos/$GITHUB_USER/$REPO_NAME/git/refs
+      - echo "Set tag v$CODEBUILD_BUILD_NUMBER to $REPO_NAME to commit hash $CODEBUILD_RESOLVED_SOURCE_VERSION"
+
+artifacts:
+  files:
+    - build/*.zip
+  #base-directory: "build-${CODEBUILD_BUILD_NUMBER}"
+  name: builds-$CODEBUILD_BUILD_NUMBER
+  discard-paths: yes

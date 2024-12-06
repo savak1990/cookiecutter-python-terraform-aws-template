@@ -3,6 +3,9 @@
   "aws_region": "us-east-1",
   "microservice_name": "my_service",
   "domain_name": "vkdev1.com",
-  "author_name": "Author",
+  "github_owner": "savak1990",
+  "github_project_name": "vkdev1-test-project",
+  "github_token_aws_secret": "api_tokens",
+  "artifacts_storage": "vkdev1-artifacts",
   "description": "Template for AWS + Python + Terraform microservice module"
 }
