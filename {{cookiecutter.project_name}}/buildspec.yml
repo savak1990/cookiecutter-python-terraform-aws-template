@@ -31,6 +31,8 @@ phases:
       - make test
       - make package
       - echo "Build artifacts ready"
+      - mkdir -p builds-$CODEBUILD_BUILD_NUMBER
+      - mv build/*.zip builds-$CODEBUILD_BUILD_NUMBER/
       - ls -lah build
   
   post_build:
@@ -49,7 +51,5 @@ phases:
 
 artifacts:
   files:
-    - build/*.zip
-  #base-directory: "build-${CODEBUILD_BUILD_NUMBER}"
-  name: builds-$CODEBUILD_BUILD_NUMBER
-  discard-paths: yes
+    - builds-*/*.zip
+  discard-paths: no

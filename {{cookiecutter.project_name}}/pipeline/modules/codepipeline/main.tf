@@ -89,7 +89,6 @@ resource "aws_codebuild_project" "build_project" {
   artifacts {
     type      = "S3"
     location  = var.root_bucket
-    path      = var.service_name
     packaging = "NONE"
   }
 
